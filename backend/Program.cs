@@ -1,20 +1,31 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http.Json;
 using Flurl;
 
 using HttpClient client = new();
 
-var b = new Book("Frankenstein", new[] { "Mary Shelley" }, 352);
+//var b = new Book("Frankenstein", new[] { "Mary Shelley" }, 352);
+Console.WriteLine(await getFromID("zyTCAlFPjgYC"));
 
 async Task<Book> getFromID(string id)
 {
     var url = "https://www.googleapis.com/books/v1/volumes".AppendPathSegment(id, true);
-    var response = await client.GetAsync(url);
+    var response = await client.GetFromJsonAsync<VolumeResponse>(url);
 
-    // TODO finish
-    return null;
+    return new Book(response!.volumeInfo.title, response!.volumeInfo.authors, response!.volumeInfo.pageCount);
 }
 
-class Book
+record VolumeInfo
+{
+    public required string title { get; set; }
+    public required string[] authors { get; set; }
+    public required int pageCount { get; set; }
+}
+record VolumeResponse
+{
+    public required VolumeInfo volumeInfo { get; set; }
+}
+
+record Book
 {
     public string Title { get; }
     public string[] Authors { get; }
