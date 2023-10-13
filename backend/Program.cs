@@ -1,42 +1,27 @@
-﻿using System.Net.Http.Json;
-using Flurl;
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-using HttpClient client = new();
+var builder = WebApplication.CreateBuilder(args);
 
-//var b = new Book("Frankenstein", new[] { "Mary Shelley" }, 352);
-Console.WriteLine(await getFromID("zyTCAlFPjgYC"));
+// Add services to the container.
 
-async Task<Book> getFromID(string id)
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    var url = "https://www.googleapis.com/books/v1/volumes".AppendPathSegment(id, true);
-    var response = await client.GetFromJsonAsync<VolumeResponse>(url);
-
-    return new Book(response!.volumeInfo.title, response!.volumeInfo.authors, response!.volumeInfo.pageCount);
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-record VolumeInfo
-{
-    public required string title { get; set; }
-    public required string[] authors { get; set; }
-    public required int pageCount { get; set; }
-}
-record VolumeResponse
-{
-    public required VolumeInfo volumeInfo { get; set; }
-}
+app.UseHttpsRedirection();
 
-record Book
-{
-    public string Title { get; }
-    public string[] Authors { get; }
-    public int PageCount { get; set; }
-    public int ReadPages { get; set; }
+app.UseAuthorization();
 
-    public Book(string title, string[] authors, int pageCount)
-    {
-        Title = title;
-        Authors = authors;
-        PageCount = pageCount;
-        ReadPages = 0;
-    }
-}
+app.MapControllers();
+
+app.Run();

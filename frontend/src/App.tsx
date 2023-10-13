@@ -2,11 +2,18 @@ import { useState } from "react";
 import "./App.css";
 
 function App() {
+  type Book = {
+    title: string;
+    authors: string[];
+    pageCount: number | undefined;
+    currentPage: number;
+  };
   const [bookTitle, setBookTitle] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [books, setBooks] = useState<any>();
+  const [readingList, setReadingList] = useState<Book[]>([]);
 
-  console.log(books);
+  console.log(readingList);
 
   const queryBooks = async (title: string) => {
     const baseURL = "https://www.googleapis.com/books/v1/volumes?";
@@ -39,9 +46,23 @@ function App() {
       {books != undefined &&
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         books.items.slice(0, 5).map((b: any) => (
-          <p>
-            <b>{b.volumeInfo.title}</b> by {b.volumeInfo.authors.join(", ")}
-          </p>
+          <button
+            onClick={() => {
+              const book: Book = {
+                title: b.volumeInfo.title,
+                authors: b.volumeInfo.authors,
+                pageCount: b.volumeInfo.pageCount,
+                currentPage: 0,
+              };
+              readingList.push(book);
+              setReadingList(readingList);
+            }}
+          >
+            <b>{b.volumeInfo.title}</b>
+            {b.volumeInfo.authors != undefined && (
+              <> by {b.volumeInfo.authors.join(", ")}</>
+            )}
+          </button>
         ))}
     </div>
   );
